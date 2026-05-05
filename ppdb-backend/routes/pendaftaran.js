@@ -189,10 +189,11 @@ router.post(
         if (files[key] && files[key][0]) {
           const file      = files[key][0];
           const id_dok    = await getNextId("D", "dokumen", "id_dokumen");
+          const file_path = `/uploads/${file.filename}`;
           await db.query(
-            `INSERT INTO dokumen (id_dokumen, id_siswa, id_jenis_dokumen, status)
-             VALUES (?, ?, ?, 'TERUPLOAD')`,
-            [id_dok, id_siswa, idJenis]
+            `INSERT INTO dokumen (id_dokumen, id_siswa, id_jenis_dokumen, status_dokumen, file_path)
+             VALUES (?, ?, ?, 'TERUPLOAD', ?)`,
+            [id_dok, id_siswa, idJenis, file_path]
           );
         }
       }

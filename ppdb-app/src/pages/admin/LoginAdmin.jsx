@@ -30,7 +30,8 @@ export default function LoginAdmin({ onLoginBerhasil, onKeSiswa }) {
       const data = raw;
       if (!res.ok) throw new Error(data.message || "Login admin gagal.");
 
-      localStorage.setItem("ppdb_token", data.token);
+      // Simpan token admin di key terpisah (tidak ppdb_token)
+      localStorage.setItem("ppdb_admin_token", data.token);
       localStorage.setItem("ppdb_admin", JSON.stringify(data.admin));
       onLoginBerhasil?.(data.admin);
     } catch (err) {

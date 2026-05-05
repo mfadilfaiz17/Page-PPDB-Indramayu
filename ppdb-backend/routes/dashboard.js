@@ -17,23 +17,24 @@ router.get("/", auth, async (req, res) => {
       `SELECT
          p.id_pendaftaran,
          p.id_jalur,
-         jp.nama_jalur,
          p.id_sekolah,
-         st.nama_sekolah,
+         p.nama_jalur_custom,
+         p.nama_sekolah_custom,
          p.tahun_ajaran,
-         DATE_FORMAT(p.tanggal_daftar, '%d %M %Y') AS tanggal_daftar
-       FROM siswa s
-       LEFT JOIN pendaftaran p     ON p.id_siswa = s.id_siswa
+         DATE_FORMAT(p.tanggal_daftar, '%d %M %Y') AS tanggal_daftar,
+         jp.nama_jalur,
+         st.nama_sekolah
+       FROM pendaftaran p
        LEFT JOIN jalur_ppdb jp     ON jp.id_jalur = p.id_jalur
        LEFT JOIN sekolah_tujuan st ON st.id_sekolah = p.id_sekolah
-       WHERE s.id_siswa = ?
+       WHERE p.id_siswa = ?
        LIMIT 1`,
       [id_siswa]
     );
 
     // 2. Status dokumen
     const [dokumen] = await db.query(
-      `SELECT jd.nama_dokumen, d.status
+      `SELECT d.id_dokumen, d.id_jenis_dokumen, d.status_dokumen, d.file_path, jd.nama_dokumen, jd.sifat_dokumen
        FROM dokumen d
        JOIN jenis_dokumen jd ON jd.id_jenis_dokumen = d.id_jenis_dokumen
        WHERE d.id_siswa = ?`,
@@ -42,23 +43,43 @@ router.get("/", auth, async (req, res) => {
 
     // 3. Hasil seleksi
     const [hasil] = await db.query(
-      `SELECT hs.status_hasil, hs.peringkat, hs.tanggal_pengumuman,
-              st.nama_sekolah, jd.nama_jalur
+      `SELECT hs.id_hasil, hs.status_hasil, hs.peringkat, DATE_FORMAT(hs.tanggal_pengumuman, '%d %M %Y') AS tanggal_pengumuman,
+              st.nama_sekolah, jp.nama_jalur
         FROM hasil_seleksi hs
         JOIN sekolah_tujuan st ON st.id_sekolah = hs.id_sekolah
-        JOIN jalur_ppdb jd   ON jd.id_jalur   = hs.id_jalur
+        JOIN jalur_ppdb jp   ON jp.id_jalur   = hs.id_jalur
        WHERE hs.id_siswa = ?
        LIMIT 1`,
       [id_siswa]
     );
 
+    // Format response pendaftaran
+    let pendaftaranData = null;
+    if (pendaftaran.length > 0 && pendaftaran[0].id_pendaftaran) {
+      const p = pendaftaran[0];
+      pendaftaranData = {
+        id_pendaftaran: p.id_pendaftaran,
+        id_jalur: p.id_jalur || null,
+        id_sekolah: p.id_sekolah || null,
+        nama_jalur: p.nama_jalur_custom || p.nama_jalur || null,
+        nama_sekolah: p.nama_sekolah_custom || p.nama_sekolah || null,
+        tahun_ajaran: p.tahun_ajaran,
+        tanggal_daftar: p.tanggal_daftar,
+      };
+    }
+
     res.json({
-      pendaftaran: (pendaftaran[0] && pendaftaran[0].id_pendaftaran) ? pendaftaran[0] : null,
+      success: true,
+      pendaftaran: pendaftaranData,
       dokumen: dokumen.map((row) => ({
-        ...row,
-        status_dokumen: row.status,
+        id_dokumen: row.id_dokumen,
+        id_jenis_dokumen: row.id_jenis_dokumen,
+        nama_dokumen: row.nama_dokumen,
+        sifat_dokumen: row.sifat_dokumen,
+        status_dokumen: row.status_dokumen,
+        file_path: row.file_path,
       })),
-      hasil: hasil[0] || null,
+      hasil: hasil.length > 0 ? hasil[0] : null,
     });
 
   } catch (err) {

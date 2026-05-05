@@ -48,15 +48,19 @@ router.get("/", auth, async (req, res) => {
   const { id_siswa } = req.siswa;
   try {
     const [rows] = await db.query(
-      `SELECT d.id_jenis_dokumen, d.status, jd.nama_dokumen, jd.sifat_dokumen
+      `SELECT d.id_dokumen, d.id_jenis_dokumen, d.status_dokumen, d.file_path, jd.nama_dokumen, jd.sifat_dokumen
        FROM dokumen d
        JOIN jenis_dokumen jd ON jd.id_jenis_dokumen = d.id_jenis_dokumen
        WHERE d.id_siswa = ?`,
       [id_siswa]
     );
     res.json(rows.map((row) => ({
-      ...row,
-      status_dokumen: row.status,
+      id_dokumen: row.id_dokumen,
+      id_jenis_dokumen: row.id_jenis_dokumen,
+      nama_dokumen: row.nama_dokumen,
+      sifat_dokumen: row.sifat_dokumen,
+      status_dokumen: row.status_dokumen,
+      file_path: row.file_path,
     })));
   } catch (err) {
     console.error("Get dokumen error:", err);
@@ -77,6 +81,9 @@ router.post("/upload", auth, upload.single("file"), async (req, res) => {
   }
 
   try {
+    // Simpan file_path (relative path dari folder uploads)
+    const file_path = `/uploads/${req.file.filename}`;
+
     // Cek apakah dokumen jenis ini sudah pernah diupload
     const [existing] = await db.query(
       "SELECT id_dokumen FROM dokumen WHERE id_siswa = ? AND id_jenis_dokumen = ?",
@@ -86,22 +93,23 @@ router.post("/upload", auth, upload.single("file"), async (req, res) => {
     if (existing.length > 0) {
       // Update record yang ada
       await db.query(
-        "UPDATE dokumen SET status = 'TERUPLOAD' WHERE id_dokumen = ?",
-        [existing[0].id_dokumen]
+        "UPDATE dokumen SET status_dokumen = 'TERUPLOAD', file_path = ? WHERE id_dokumen = ?",
+        [file_path, existing[0].id_dokumen]
       );
     } else {
       // Insert baru
       const id_dok = await getNextId("D", "dokumen", "id_dokumen");
       await db.query(
-        `INSERT INTO dokumen (id_dokumen, id_siswa, id_jenis_dokumen, status)
-         VALUES (?, ?, ?, 'TERUPLOAD')`,
-        [id_dok, id_siswa, id_jenis_dokumen]
+        `INSERT INTO dokumen (id_dokumen, id_siswa, id_jenis_dokumen, status_dokumen, file_path)
+         VALUES (?, ?, ?, 'TERUPLOAD', ?)`,
+        [id_dok, id_siswa, id_jenis_dokumen, file_path]
       );
     }
 
     res.json({
       success: true,
       status_dokumen: "TERUPLOAD",
+      file_path,
       message: "Dokumen berhasil diupload.",
     });
 

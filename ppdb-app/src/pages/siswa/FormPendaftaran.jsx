@@ -232,63 +232,133 @@ function LangkahSatu({ data, onChange }) {
 //  LANGKAH 2: Jalur & Sekolah Tujuan
 // ─────────────────────────────────────────────
 function LangkahDua({ data, onChange, jalurList, sekolahList, periodeText, loadingOpsi }) {
-  const sekolahFiltered = useMemo(() => {
-    if (!data.jalur) return sekolahList;
-    return sekolahList.filter((s) => s.id_jalur === data.jalur);
-  }, [data.jalur, sekolahList]);
+  // Filter jalur berdasarkan sekolah yang dipilih
+  const jalurUntukSekolahDipilih = useMemo(() => {
+    if (!data.sekolah) return [];
+    const sekolahDipilih = sekolahList.find(s => s.id_sekolah === data.sekolah);
+    if (!sekolahDipilih) return [];
+    // Return semua jalur yang id_jalurnya sama dengan sekolah yang dipilih
+    return jalurList.filter(j => j.id_jalur === sekolahDipilih.id_jalur);
+  }, [data.sekolah, sekolahList, jalurList]);
 
   const isCustom = !!data.jalur_custom || !!data.sekolah_custom;
 
-  const onPilihJalur = (jalurId) => {
-    onChange("jalur", jalurId);
-    onChange("sekolah", "");
-  };
-
   return (
     <div>
-      <SectionTitle title="Pilih Jalur Pendaftaran" />
+      <SectionTitle title="Pilih Sekolah Tujuan Terlebih Dahulu" />
       {loadingOpsi && (
         <div style={{ marginBottom: 12, fontSize: 12.5, color: "#7a8fa8" }}>
           Memuat opsi pendaftaran dari server...
         </div>
       )}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 12 }}>
-        {jalurList.map((j) => {
-          const active = data.jalur === j.id_jalur;
-          return (
-            <div
-              key={j.id_jalur}
-              onClick={() => onPilihJalur(j.id_jalur)}
-              style={{
-                border: `2px solid ${active ? "#3a7bd5" : "#dde6f4"}`,
-                borderRadius: 12,
-                padding: "14px 16px",
-                cursor: "pointer",
-                background: active ? "#eff6ff" : "#fff",
-                transition: "all .2s",
-                userSelect: "none",
-              }}
-            >
-              <div style={{ fontWeight: 700, fontSize: 14, color: "#1c2e4a", marginBottom: 2 }}>
-                {j.nama_jalur}
+
+      {!isCustom && (
+        <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 24 }}>
+          {sekolahList.map((s) => {
+            const active = data.sekolah === s.id_sekolah;
+            return (
+              <div key={s.id_sekolah}>
+                <div
+                  onClick={() => onChange("sekolah", s.id_sekolah)}
+                  style={{
+                    border: `2px solid ${active ? "#3a7bd5" : "#dde6f4"}`,
+                    borderRadius: 10,
+                    padding: "13px 16px",
+                    cursor: "pointer",
+                    background: active ? "#eff6ff" : "#fff",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 12,
+                    transition: "all .2s",
+                    userSelect: "none",
+                  }}
+                >
+                  <div
+                    style={{
+                      width: 36,
+                      height: 36,
+                      borderRadius: 8,
+                      background: active ? "#3a7bd5" : "#0d2240",
+                      color: "#fff",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      fontWeight: 800,
+                      fontSize: 14,
+                      flexShrink: 0,
+                    }}
+                  >
+                    {s.id_sekolah.replace("ST", "")}
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <span style={{ fontSize: 13.5, fontWeight: active ? 700 : 500, color: "#1c2e4a", display: "block" }}>
+                      {s.nama_sekolah} ({s.jenjang})
+                    </span>
+                    <span style={{ fontSize: 12, color: "#7a8fa8" }}>
+                      Kuota: {s.kuota} siswa
+                    </span>
+                  </div>
+                  {active && (
+                    <span
+                      style={{
+                        background: "#dbeafe",
+                        color: "#1e40af",
+                        fontSize: 11,
+                        fontWeight: 700,
+                        padding: "2px 10px",
+                        borderRadius: 20,
+                      }}
+                    >
+                      Dipilih
+                    </span>
+                  )}
+                </div>
+
+                {/* Tampilkan jalur yang tersedia untuk sekolah ini jika sekolah dipilih */}
+                {active && jalurUntukSekolahDipilih.length > 0 && (
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: 10, marginTop: 10, marginLeft: 8, marginBottom: 12, paddingLeft: 12, borderLeft: "3px solid #dbeafe" }}>
+                    <div style={{ fontSize: 11, fontWeight: 700, color: "#6a7d9b", alignSelf: "center", gridColumn: "1 / -1" }}>
+                      Jalur yang tersedia untuk sekolah ini:
+                    </div>
+                    {jalurUntukSekolahDipilih.map((j) => {
+                      const jalurActive = data.jalur === j.id_jalur;
+                      return (
+                        <div
+                          key={j.id_jalur}
+                          onClick={() => onChange("jalur", j.id_jalur)}
+                          style={{
+                            border: `2px solid ${jalurActive ? "#3a7bd5" : "#dde6f4"}`,
+                            borderRadius: 8,
+                            padding: "10px 12px",
+                            cursor: "pointer",
+                            background: jalurActive ? "#eff6ff" : "#fff",
+                            transition: "all .2s",
+                            userSelect: "none",
+                            textAlign: "center",
+                          }}
+                        >
+                          <div style={{ fontWeight: 700, fontSize: 12, color: "#1c2e4a", marginBottom: 3 }}>
+                            {j.nama_jalur}
+                          </div>
+                          <div style={{ fontSize: 10, color: "#7a8fa8" }}>
+                            Kuota {j.persentase_kuota}%
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+
+                {active && jalurUntukSekolahDipilih.length === 0 && (
+                  <div style={{ marginTop: 8, marginLeft: 8, fontSize: 12, color: "#92400e", padding: "8px 12px", background: "#fffbeb", borderRadius: 8, border: "1px solid #fde68a" }}>
+                    ⚠️ Tidak ada jalur yang tersedia untuk sekolah ini
+                  </div>
+                )}
               </div>
-              <div
-                style={{
-                  display: "inline-block",
-                  fontSize: 11,
-                  fontWeight: 700,
-                  padding: "2px 8px",
-                  borderRadius: 20,
-                  background: active ? "#dbeafe" : "#f0f4fa",
-                  color: active ? "#1e40af" : "#6a7d9b",
-                }}
-              >
-                Kuota {j.persentase_kuota}%
-              </div>
-            </div>
-          );
-        })}
-      </div>
+            );
+          })}
+        </div>
+      )}
 
       <div style={{ marginBottom: 12 }}>
         <button
@@ -297,14 +367,11 @@ function LangkahDua({ data, onChange, jalurList, sekolahList, periodeText, loadi
             if (!isCustom) {
               onChange("jalur_custom", "");
               onChange("sekolah_custom", "");
-              onChange("jalur", "");
               onChange("sekolah", "");
+              onChange("jalur", "");
             } else {
               onChange("jalur_custom", "");
               onChange("sekolah_custom", "");
-              // toggle off
-              onChange("jalur_custom", undefined);
-              onChange("sekolah_custom", undefined);
             }
           }}
           style={{
@@ -321,90 +388,22 @@ function LangkahDua({ data, onChange, jalurList, sekolahList, periodeText, loadi
         </button>
       </div>
 
-      <SectionTitle title="Pilih Sekolah Tujuan" />
-      {data.jalur && !isCustom && sekolahFiltered.length === 0 && (
-        <div style={{ marginBottom: 10, fontSize: 12.5, color: "#92400e" }}>
-          Belum ada sekolah untuk jalur yang dipilih.
-        </div>
-      )}
-      {!isCustom && (
-        <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 24 }}>
-          {sekolahFiltered.map((s) => {
-          const active = data.sekolah === s.id_sekolah;
-          return (
-            <div
-              key={s.id_sekolah}
-              onClick={() => onChange("sekolah", s.id_sekolah)}
-              style={{
-                border: `2px solid ${active ? "#3a7bd5" : "#dde6f4"}`,
-                borderRadius: 10,
-                padding: "13px 16px",
-                cursor: "pointer",
-                background: active ? "#eff6ff" : "#fff",
-                display: "flex",
-                alignItems: "center",
-                gap: 12,
-                transition: "all .2s",
-                userSelect: "none",
-              }}
-            >
-              <div
-                style={{
-                  width: 36,
-                  height: 36,
-                  borderRadius: 8,
-                  background: active ? "#3a7bd5" : "#0d2240",
-                  color: "#fff",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  fontWeight: 800,
-                  fontSize: 14,
-                  flexShrink: 0,
-                }}
-              >
-                {s.id_sekolah.replace("ST", "")}
-              </div>
-              <span style={{ fontSize: 13.5, fontWeight: active ? 700 : 500, color: "#1c2e4a" }}>
-                {`${s.nama_sekolah} (${s.jenjang}) — Kuota: ${s.kuota} siswa`}
-              </span>
-              {active && (
-                <span
-                  style={{
-                    marginLeft: "auto",
-                    background: "#dbeafe",
-                    color: "#1e40af",
-                    fontSize: 11,
-                    fontWeight: 700,
-                    padding: "2px 10px",
-                    borderRadius: 20,
-                  }}
-                >
-                  Dipilih
-                </span>
-              )}
-            </div>
-          );
-          })}
-        </div>
-      )}
-
       {isCustom && (
         <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 12, marginBottom: 24 }}>
-          <Field label="Nama Jalur (tuliskan sendiri)" required>
-            <Input
-              type="text"
-              placeholder="Contoh: Jalur Prestasi Lokal"
-              value={data.jalur_custom || ''}
-              onChange={(e) => onChange('jalur_custom', e.target.value)}
-            />
-          </Field>
           <Field label="Nama Sekolah Tujuan (tuliskan sendiri)" required>
             <Input
               type="text"
               placeholder="Contoh: SMA Swasta Harapan Bangsa"
               value={data.sekolah_custom || ''}
               onChange={(e) => onChange('sekolah_custom', e.target.value)}
+            />
+          </Field>
+          <Field label="Nama Jalur (tuliskan sendiri)" required>
+            <Input
+              type="text"
+              placeholder="Contoh: Jalur Prestasi Lokal"
+              value={data.jalur_custom || ''}
+              onChange={(e) => onChange('jalur_custom', e.target.value)}
             />
           </Field>
         </div>
@@ -422,7 +421,7 @@ function LangkahDua({ data, onChange, jalurList, sekolahList, periodeText, loadi
         }}
       >
         Periode Pendaftaran: <strong>{periodeText}</strong>.
-        Pastikan jalur yang dipilih sesuai dengan dokumen yang akan diunggah.
+        Pastikan sekolah dan jalur yang dipilih sesuai dengan dokumen yang akan diunggah.
       </div>
     </div>
   );
@@ -630,7 +629,7 @@ function StepIndicator({ langkah }) {
                 transition: "all .3s",
               }}
             >
-              {langkah > s.no ? "Selesai" : s.no}
+              {langkah > s.no ? "✓" : s.no}
             </div>
             <span
               style={{
@@ -677,9 +676,9 @@ function validasiLangkah(langkah, dataDiri, dataPilihan) {
     if (nik.length !== 16) return "NIK harus 16 digit.";
   }
   if (langkah === 2) {
-    // Accept either selected ids OR custom text inputs
-    if ((!dataPilihan.jalur || !dataPilihan.sekolah) && (!dataPilihan.jalur_custom || !dataPilihan.sekolah_custom)) {
-      return "Pilih jalur & sekolah atau isi sendiri nama jalur dan sekolah.";
+    // Harus pilih sekolah dan jalur
+    if ((!dataPilihan.sekolah || !dataPilihan.jalur) && (!dataPilihan.sekolah_custom || !dataPilihan.jalur_custom)) {
+      return "Pilih sekolah terlebih dahulu, maka jalur akan muncul otomatis. Atau isi sendiri nama sekolah dan jalur.";
     }
   }
   return null;
@@ -789,8 +788,8 @@ export default function FormPendaftaran({ onKembali, onSelesai }) {
     alamat_siswa: "", no_hp: "", asal_sekolah: "", nilai_rata: "",
   });
 
-  // State: Langkah 2 — jalur & sekolah
-  const [dataPilihan, setDataPilihan] = useState({ jalur: "", sekolah: "" });
+  // State: Langkah 2 — sekolah & jalur (sebaliknya: sekolah dulu, jalur follow)
+  const [dataPilihan, setDataPilihan] = useState({ sekolah: "", jalur: "" });
 
   // State: Langkah 3 — file dokumen
   const [files, setFiles] = useState({

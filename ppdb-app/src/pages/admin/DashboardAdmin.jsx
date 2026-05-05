@@ -44,7 +44,7 @@ export default function DashboardAdmin({ onLogout, onNavigate }) {
   useEffect(() => {
     const fetchRingkasan = async () => {
       try {
-        const token = localStorage.getItem("ppdb_token") || "";
+        const token = localStorage.getItem("ppdb_admin_token") || "admin-token-2025";
         const res = await fetch("http://localhost:5000/api/pendaftaran/admin", {
           headers: { Authorization: `Bearer ${token}` },
         });
@@ -54,8 +54,8 @@ export default function DashboardAdmin({ onLogout, onNavigate }) {
           setRecent(
             json.slice(0, 5).map((item) => ({
               nama: item.nama_lengkap,
-              sekolah: item.nama_sekolah,
-              jalur: item.nama_jalur,
+              sekolah: item.nama_sekolah || item.nama_sekolah_custom,
+              jalur: item.nama_jalur || item.nama_jalur_custom,
               status: item.status,
             }))
           );

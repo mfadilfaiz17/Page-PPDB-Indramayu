@@ -487,7 +487,7 @@ export default function HalamanAuth({ onLoginBerhasil, onKeAdmin }) {
 
             <div className="mt-12 rounded-2xl border border-white/15 bg-white/5 p-5 text-sm leading-7 text-cyan-50/90">
               <p>Bantuan pendaftaran tersedia selama periode PPDB berlangsung.</p>
-              <p>Email panitia: ppdb@indramayu.sch.id</p>
+              <p>Email: ppdb@indramayu.sch.id</p>
             </div>
 
             {onKeAdmin && (

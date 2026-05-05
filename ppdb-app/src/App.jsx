@@ -20,13 +20,16 @@ export default function App() {
   const [halaman, setHalaman] = useState("auth");
   const [siswa,   setSiswa]   = useState(null);
 
-  const token = localStorage.getItem("ppdb_token");
+  // Ambil token dan data dari localStorage
+  const siswaToken = localStorage.getItem("ppdb_token");
+  const adminToken = localStorage.getItem("ppdb_admin_token");
   const siswaLokal = getSiswaLokal();
   const adminLokal = localStorage.getItem("ppdb_admin");
 
   useEffect(() => {
-    if (token && adminLokal)       setHalaman("admin.dashboard");
-    else if (token && siswaLokal) { setSiswa(siswaLokal); setHalaman("dashboard"); }
+    // Prioritas: Admin > Siswa
+    if (adminToken && adminLokal)       setHalaman("admin.dashboard");
+    else if (siswaToken && siswaLokal) { setSiswa(siswaLokal); setHalaman("dashboard"); }
   }, []);
 
   const handleLoginSiswa = (d) => { setSiswa(d); setHalaman("dashboard"); };
@@ -37,8 +40,8 @@ export default function App() {
     setHalaman("auth");
   };
 
-  const isSiswaLoggedIn = Boolean(token && siswaLokal);
-  const isAdminLoggedIn = Boolean(token && adminLokal);
+  const isSiswaLoggedIn = Boolean(siswaToken && siswaLokal);
+  const isAdminLoggedIn = Boolean(adminToken && adminLokal);
 
   const renderAuth = () => <HalamanAuth onLoginBerhasil={handleLoginSiswa} onKeAdmin={() => setHalaman("admin.login")} />;
 
