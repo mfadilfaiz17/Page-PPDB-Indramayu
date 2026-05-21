@@ -2,6 +2,7 @@ const express = require("express");
 const bcrypt  = require("bcryptjs");
 const jwt     = require("jsonwebtoken");
 const db      = require("../config/database");
+const { authLimiter } = require("../middleware/rateLimiter");
 require("dotenv").config();
 
 const router = express.Router();
@@ -58,7 +59,7 @@ async function ensureAdminTable() {
 //  POST /api/auth/register
 //  Membuat akun baru + data siswa
 // ─────────────────────────────────────────────
-router.post("/register", async (req, res) => {
+router.post("/register", authLimiter, async (req, res) => {
   const {
     // Akun_PPDB
     email, password,
@@ -154,7 +155,7 @@ router.post("/register", async (req, res) => {
 //  POST /api/auth/login
 //  Login siswa dan kembalikan token JWT
 // ─────────────────────────────────────────────
-router.post("/login", async (req, res) => {
+router.post("/login", authLimiter, async (req, res) => {
   const { email, password } = req.body;
 
   // Trim email dan password
@@ -218,7 +219,7 @@ router.post("/login", async (req, res) => {
 //  POST /api/auth/admin-login
 //  Login admin dari tabel admin_ppdb
 // ─────────────────────────────────────────────
-router.post("/admin-login", async (req, res) => {
+router.post("/admin-login", authLimiter, async (req, res) => {
   const { username, password } = req.body;
 
   const trimmedUsername = username?.trim() || "";
