@@ -1,6 +1,7 @@
 const express = require("express");
 const db = require("../config/database");
 const requireAdmin = require("../middleware/requireAdmin");
+const { authorize } = require("../middleware/authorize");
 const { generateId } = require("../utils/idGenerator");
 
 const router = express.Router();
@@ -64,7 +65,7 @@ router.get("/sekolah", async (req, res) => {
   }
 });
 
-router.post("/sekolah", async (req, res) => {
+router.post("/sekolah", authorize("sekolah", "manage"), async (req, res) => {
   try {
     const { npsn, nama_sekolah, jenjang, kuota, alamat_sekolah, id_siswa } = req.body;
 
@@ -97,7 +98,7 @@ router.post("/sekolah", async (req, res) => {
   }
 });
 
-router.put("/sekolah/:id", async (req, res) => {
+router.put("/sekolah/:id", authorize("sekolah", "manage"), async (req, res) => {
   try {
     const { id } = req.params;
     const { npsn, nama_sekolah, jenjang, kuota, alamat_sekolah, id_siswa } = req.body;
@@ -132,7 +133,7 @@ router.put("/sekolah/:id", async (req, res) => {
   }
 });
 
-router.delete("/sekolah/:id", async (req, res) => {
+router.delete("/sekolah/:id", authorize("sekolah", "manage"), async (req, res) => {
   try {
     const [used] = await db.query(
       "SELECT id_sekolah FROM hasil_seleksi WHERE id_sekolah = ? LIMIT 1",
@@ -168,7 +169,7 @@ router.get("/jalur", async (req, res) => {
   }
 });
 
-router.post("/jalur", async (req, res) => {
+router.post("/jalur", authorize("jalur", "manage"), async (req, res) => {
   try {
     const { nama_jalur, persentase_kuota, id_siswa, id_syarat } = req.body;
 
@@ -199,7 +200,7 @@ router.post("/jalur", async (req, res) => {
   }
 });
 
-router.put("/jalur/:id", async (req, res) => {
+router.put("/jalur/:id", authorize("jalur", "manage"), async (req, res) => {
   try {
     const { id } = req.params;
     const { nama_jalur, persentase_kuota, id_siswa, id_syarat } = req.body;
@@ -232,7 +233,7 @@ router.put("/jalur/:id", async (req, res) => {
   }
 });
 
-router.delete("/jalur/:id", async (req, res) => {
+router.delete("/jalur/:id", authorize("jalur", "manage"), async (req, res) => {
   try {
     const [usedSekolah] = await db.query(
       "SELECT id_jalur FROM sekolah_tujuan WHERE id_jalur = ? LIMIT 1",

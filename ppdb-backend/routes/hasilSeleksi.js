@@ -2,6 +2,7 @@ const express = require("express");
 const db      = require("../config/database");
 const auth    = require("../middleware/auth");
 const requireAdmin = require("../middleware/requireAdmin");
+const { authorize } = require("../middleware/authorize");
 const { generateId } = require("../utils/idGenerator");
 
 const router = express.Router();
@@ -76,7 +77,7 @@ router.get("/admin", requireAdmin, async (req, res) => {
 //  POST /api/hasil-seleksi
 //  Admin input hasil seleksi siswa
 // ─────────────────────────────────────────────
-router.post("/", requireAdmin, async (req, res) => {
+router.post("/", requireAdmin, authorize("hasil_seleksi", "create"), async (req, res) => {
   const { id_siswa, id_sekolah, id_jalur, status_hasil, peringkat, tanggal_pengumuman } = req.body;
 
   if (!id_siswa || !id_sekolah || !id_jalur || !status_hasil || !peringkat) {
