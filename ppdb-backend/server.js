@@ -5,6 +5,7 @@ const path       = require("path");
 require("dotenv").config({ path: path.join(__dirname, ".env") });
 
 const { initializeRBAC } = require("./services/rbacService");
+const errorHandler = require("./middleware/errorHandler");
 
 const app = express();
 
@@ -67,11 +68,8 @@ app.get("/", (req, res) => {
   });
 });
 
-// Handler error global
-app.use((err, req, res, next) => {
-  console.error("❌ Error:", err.message);
-  res.status(500).json({ message: err.message || "Terjadi kesalahan server." });
-});
+// Handler error global (centralized)
+app.use(errorHandler);
 
 // ─────────────────────────────────────────────
 //  JALANKAN SERVER

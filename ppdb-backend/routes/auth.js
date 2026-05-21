@@ -5,6 +5,7 @@ const db      = require("../config/database");
 const { authLimiter } = require("../middleware/rateLimiter");
 const { auditAuthAttempt } = require("../middleware/auditLog");
 const { generateId } = require("../utils/idGenerator");
+const { authSchemas, validateRequest } = require("../schemas/validation");
 require("dotenv").config();
 
 const router = express.Router();
@@ -55,30 +56,25 @@ async function ensureAdminTable() {
 //  POST /api/auth/register
 //  Membuat akun baru + data siswa
 // ─────────────────────────────────────────────
-router.post("/register", authLimiter, auditAuthAttempt("student"), async (req, res) => {
-  const {
-    // Akun_PPDB
-    email, password,
-    // Siswa
-    nisn, nik, nama_lengkap, jenis_kelamin, tanggal_lahir,
-    desa, kecamatan, alamat_siswa, no_hp, asal_sekolah, nilai_rata,
-  } = req.body;
-
-  // Trim email dan password untuk hilangkan whitespace tersembunyi
-  const trimmedEmail = email?.trim() || "";
-  const trimmedPassword = password?.trim() || "";
-
-  // Validasi field wajib
-  if (!trimmedEmail || !trimmedPassword || !nisn || !nik || !nama_lengkap ||
-      !jenis_kelamin || !tanggal_lahir || !alamat_siswa ||
-      !no_hp || !asal_sekolah || !nilai_rata) {
-    return res.status(400).json({ message: "Semua field wajib diisi." });
-  }
-
+router.post("/register", authLimiter, auditAuthAttempt("student"), async (req, res, next) => {
   try {
-    // Cek email sudah terdaftar
+    // Validate input with Zod schema
+    const validation = validateRequest(req.body, authSchemas.register);
+    if (!validation.isValid) {
+      return res.status(400).json({
+        success: false,
+        message: "Data tidak valid",
+        errors: validation.errors,
+      });
+    }
+
+    const {
+      email, password, nisn, nik, nama_lengkap, jenis_kelamin, tanggal_lahir,
+      desa, kecamatan, alamat_siswa, no_hp, asal_sekolah, nilai_rata,
+    } = validation.data;
+     // Cek email sudah terdaftar
     const [cekEmail] = await db.query(
-      "SELECT id_akun FROM akun_ppdb WHERE email = ?", [trimmedEmail]
+      "SELECT id_akun FROM akun_ppdb WHERE email = ?", [email]
     );
     if (cekEmail.length > 0) {
       return res.status(400).json({ message: "Email sudah terdaftar." });
@@ -93,7 +89,7 @@ router.post("/register", authLimiter, auditAuthAttempt("student"), async (req, r
     }
 
     // Hash password sebelum disimpan
-    const hashedPassword = await bcrypt.hash(password.trim(), 10);
+    const hashedPassword = await bcrypt.hash(password, 10);
 
     // Generate ID
     const id_akun  = generateId("A");
@@ -104,7 +100,7 @@ router.post("/register", authLimiter, auditAuthAttempt("student"), async (req, r
     // Simpan ke tabel Akun_PPDB
     await db.query(
       "INSERT INTO akun_ppdb (id_akun, email, password) VALUES (?, ?, ?)",
-      [id_akun, trimmedEmail, hashedPassword]
+      [id_akun, email, hashedPassword]
     );
 
     // Simpan ke tabel Siswa
@@ -127,7 +123,7 @@ router.post("/register", authLimiter, auditAuthAttempt("student"), async (req, r
       {
         id_akun: id_akun,
         id_siswa: id_siswa,
-        email: trimmedEmail,
+        email: email,
       },
       process.env.JWT_SECRET,
       { expiresIn: process.env.JWT_EXPIRES_IN }
@@ -143,7 +139,7 @@ router.post("/register", authLimiter, auditAuthAttempt("student"), async (req, r
 
   } catch (err) {
     console.error("Register error:", err);
-    res.status(500).json({ message: "Terjadi kesalahan server." });
+    next(err);
   }
 });
 
@@ -151,28 +147,30 @@ router.post("/register", authLimiter, auditAuthAttempt("student"), async (req, r
 //  POST /api/auth/login
 //  Login siswa dan kembalikan token JWT
 // ─────────────────────────────────────────────
-router.post("/login", authLimiter, auditAuthAttempt("student"), async (req, res) => {
-  const { email, password } = req.body;
-
-  // Trim email dan password
-  const trimmedEmail = email?.trim() || "";
-  const trimmedPassword = password?.trim() || "";
-
-  if (!trimmedEmail || !trimmedPassword) {
-    return res.status(400).json({ message: "Email dan password wajib diisi." });
-  }
-
+router.post("/login", authLimiter, auditAuthAttempt("student"), async (req, res, next) => {
   try {
+    // Validate input with Zod schema
+    const validation = validateRequest(req.body, authSchemas.login);
+    if (!validation.isValid) {
+      return res.status(400).json({
+        success: false,
+        message: "Data tidak valid",
+        errors: validation.errors,
+      });
+    }
+
+    const { email, password } = validation.data;
+
     // Cari akun berdasarkan email
     const [akun] = await db.query(
-      "SELECT id_akun, email, `password` FROM akun_ppdb WHERE email = ?", [trimmedEmail]
+      "SELECT id_akun, email, `password` FROM akun_ppdb WHERE email = ?", [email]
     );
     if (akun.length === 0) {
       return res.status(401).json({ message: "Email tidak terdaftar." });
     }
 
     // Cek password
-    const passwordCocok = await bcrypt.compare(trimmedPassword, akun[0].password);
+    const passwordCocok = await bcrypt.compare(password, akun[0].password);
     if (!passwordCocok) {
       return res.status(401).json({ message: "Password salah." });
     }
@@ -207,7 +205,7 @@ router.post("/login", authLimiter, auditAuthAttempt("student"), async (req, res)
 
   } catch (err) {
     console.error("Login error:", err);
-    res.status(500).json({ message: "Terjadi kesalahan server." });
+    next(err);
   }
 });
 
@@ -215,22 +213,25 @@ router.post("/login", authLimiter, auditAuthAttempt("student"), async (req, res)
 //  POST /api/auth/admin-login
 //  Login admin dari tabel admin_ppdb
 // ─────────────────────────────────────────────
-router.post("/admin-login", authLimiter, auditAuthAttempt("admin"), async (req, res) => {
-  const { username, password } = req.body;
-
-  const trimmedUsername = username?.trim() || "";
-  const trimmedPassword = password?.trim() || "";
-
-  if (!trimmedUsername || !trimmedPassword) {
-    return res.status(400).json({ message: "Username dan password wajib diisi." });
-  }
-
+router.post("/admin-login", authLimiter, auditAuthAttempt("admin"), async (req, res, next) => {
   try {
+    // Validate input with Zod schema
+    const validation = validateRequest(req.body, authSchemas.adminLogin);
+    if (!validation.isValid) {
+      return res.status(400).json({
+        success: false,
+        message: "Data tidak valid",
+        errors: validation.errors,
+      });
+    }
+
+    const { username, password } = validation.data;
+
     await ensureAdminTable();
 
     const [rows] = await db.query(
       "SELECT id_admin, username, `password`, nama_admin, id_role FROM admin_ppdb WHERE username = ? LIMIT 1",
-      [trimmedUsername]
+      [username]
     );
 
     if (rows.length === 0) {
@@ -240,8 +241,8 @@ router.post("/admin-login", authLimiter, auditAuthAttempt("admin"), async (req, 
     const admin = rows[0];
     const isHashed = typeof admin.password === "string" && admin.password.startsWith("$2");
     const passwordCocok = isHashed
-      ? await bcrypt.compare(trimmedPassword, admin.password)
-      : admin.password === trimmedPassword;
+      ? await bcrypt.compare(password, admin.password)
+      : admin.password === password;
 
     if (!passwordCocok) {
       return res.status(401).json({ message: "Username atau password salah." });
@@ -272,7 +273,7 @@ router.post("/admin-login", authLimiter, auditAuthAttempt("admin"), async (req, 
     });
   } catch (err) {
     console.error("Admin login error:", err);
-    res.status(500).json({ message: "Terjadi kesalahan server." });
+    next(err);
   }
 });
 
