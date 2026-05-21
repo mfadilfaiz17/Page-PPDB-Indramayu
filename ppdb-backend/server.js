@@ -9,9 +9,10 @@ const app = express();
 //  MIDDLEWARE GLOBAL
 // ─────────────────────────────────────────────
 
-// Izinkan request dari React (localhost:5173)
+// Izinkan request dari React — configurable via .env
+const CORS_ORIGIN = process.env.FRONTEND_URL || "http://localhost:5173";
 app.use(cors({
-  origin: "http://localhost:5173",
+  origin: CORS_ORIGIN,
   credentials: true,
 }));
 
