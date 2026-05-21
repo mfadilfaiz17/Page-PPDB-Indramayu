@@ -40,6 +40,7 @@ app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 // ─────────────────────────────────────────────
 app.use("/health",            require("./routes/health"));
 app.use("/api/auth",          require("./routes/auth"));
+app.use("/api/email-auth",    require("./routes/emailAuth"));
 app.use("/api/dashboard",     require("./routes/dashboard"));
 app.use("/api/pendaftaran",   require("./routes/pendaftaran"));
 app.use("/api/master",        require("./routes/master"));
@@ -57,6 +58,11 @@ app.get("/", (req, res) => {
       "POST /api/auth/register",
       "POST /api/auth/login",
       "POST /api/auth/admin-login",
+      "POST /api/email-auth/resend-verification",
+      "POST /api/email-auth/verify-email",
+      "POST /api/email-auth/forgot-password",
+      "POST /api/email-auth/reset-password",
+      "GET  /api/email-auth/check-token",
       "GET  /api/dashboard",
       "POST /api/pendaftaran",
       "GET/POST/PUT/DELETE /api/master/sekolah",

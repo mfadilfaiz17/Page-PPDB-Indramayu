@@ -3,6 +3,7 @@ const db = require("../config/database");
 const requireAdmin = require("../middleware/requireAdmin");
 const { authorize } = require("../middleware/authorize");
 const { generateId } = require("../utils/idGenerator");
+const { masterSchemas, validateRequest } = require("../schemas/validation");
 
 const router = express.Router();
 
@@ -61,17 +62,24 @@ router.get("/sekolah", async (req, res) => {
     res.json(rows.map(mapSekolah));
   } catch (err) {
     console.error("Get sekolah error:", err);
-    res.status(500).json({ message: "Gagal memuat data sekolah." });
+    next(err);
   }
 });
 
-router.post("/sekolah", authorize("sekolah", "manage"), async (req, res) => {
+router.post("/sekolah", authorize("sekolah", "manage"), async (req, res, next) => {
   try {
-    const { npsn, nama_sekolah, jenjang, kuota, alamat_sekolah, id_siswa } = req.body;
-
-    if (!npsn || !nama_sekolah || !jenjang || !kuota || !alamat_sekolah) {
-      return res.status(400).json({ message: "Semua field sekolah wajib diisi." });
+    // Validate input with Zod schema
+    const validation = validateRequest(req.body, masterSchemas.sekolah);
+    if (!validation.isValid) {
+      return res.status(400).json({
+        success: false,
+        message: "Data tidak valid",
+        errors: validation.errors,
+      });
     }
+
+    const { npsn, nama_sekolah, jenjang, kuota, alamat_sekolah } = validation.data;
+    const { id_siswa } = req.body; // Optional field not in schema
 
     const refs = await getDefaultRefs();
     const id_sekolah = generateId("ST");
@@ -94,14 +102,26 @@ router.post("/sekolah", authorize("sekolah", "manage"), async (req, res) => {
     res.status(201).json({ success: true, data: { id_sekolah, npsn, nama_sekolah, jenjang, kuota, alamat_sekolah } });
   } catch (err) {
     console.error("Create sekolah error:", err);
-    res.status(500).json({ message: "Gagal menambah sekolah." });
+    next(err);
   }
 });
 
-router.put("/sekolah/:id", authorize("sekolah", "manage"), async (req, res) => {
+router.put("/sekolah/:id", authorize("sekolah", "manage"), async (req, res, next) => {
   try {
     const { id } = req.params;
-    const { npsn, nama_sekolah, jenjang, kuota, alamat_sekolah, id_siswa } = req.body;
+    
+    // Validate input with Zod schema
+    const validation = validateRequest(req.body, masterSchemas.sekolah);
+    if (!validation.isValid) {
+      return res.status(400).json({
+        success: false,
+        message: "Data tidak valid",
+        errors: validation.errors,
+      });
+    }
+
+    const { npsn, nama_sekolah, jenjang, kuota, alamat_sekolah } = validation.data;
+    const { id_siswa } = req.body; // Optional field not in schema
 
     const [current] = await db.query(
       "SELECT id_siswa FROM sekolah_tujuan WHERE id_sekolah = ?",
@@ -129,7 +149,7 @@ router.put("/sekolah/:id", authorize("sekolah", "manage"), async (req, res) => {
     res.json({ success: true, message: "Sekolah berhasil diperbarui." });
   } catch (err) {
     console.error("Update sekolah error:", err);
-    res.status(500).json({ message: "Gagal memperbarui sekolah." });
+    next(err);
   }
 });
 
@@ -151,7 +171,7 @@ router.delete("/sekolah/:id", authorize("sekolah", "manage"), async (req, res) =
     res.json({ success: true, message: "Sekolah berhasil dihapus." });
   } catch (err) {
     console.error("Delete sekolah error:", err);
-    res.status(500).json({ message: "Gagal menghapus sekolah." });
+    next(err);
   }
 });
 
@@ -165,17 +185,24 @@ router.get("/jalur", async (req, res) => {
     res.json(rows.map(mapJalur));
   } catch (err) {
     console.error("Get jalur error:", err);
-    res.status(500).json({ message: "Gagal memuat data jalur." });
+    next(err);
   }
 });
 
-router.post("/jalur", authorize("jalur", "manage"), async (req, res) => {
+router.post("/jalur", authorize("jalur", "manage"), async (req, res, next) => {
   try {
-    const { nama_jalur, persentase_kuota, id_siswa, id_syarat } = req.body;
-
-    if (!nama_jalur || !persentase_kuota) {
-      return res.status(400).json({ message: "Nama jalur dan kuota wajib diisi." });
+    // Validate input with Zod schema
+    const validation = validateRequest(req.body, masterSchemas.jalur);
+    if (!validation.isValid) {
+      return res.status(400).json({
+        success: false,
+        message: "Data tidak valid",
+        errors: validation.errors,
+      });
     }
+
+    const { nama_jalur, persentase_kuota, id_syarat } = validation.data;
+    const { id_siswa } = req.body; // Optional field not in schema
 
     const refs = await getDefaultRefs();
     const id_jalur = generateId("J");
@@ -196,14 +223,26 @@ router.post("/jalur", authorize("jalur", "manage"), async (req, res) => {
     res.status(201).json({ success: true, data: { id_jalur, nama_jalur, persentase_kuota } });
   } catch (err) {
     console.error("Create jalur error:", err);
-    res.status(500).json({ message: "Gagal menambah jalur." });
+    next(err);
   }
 });
 
-router.put("/jalur/:id", authorize("jalur", "manage"), async (req, res) => {
+router.put("/jalur/:id", authorize("jalur", "manage"), async (req, res, next) => {
   try {
     const { id } = req.params;
-    const { nama_jalur, persentase_kuota, id_siswa, id_syarat } = req.body;
+    
+    // Validate input with Zod schema
+    const validation = validateRequest(req.body, masterSchemas.jalur);
+    if (!validation.isValid) {
+      return res.status(400).json({
+        success: false,
+        message: "Data tidak valid",
+        errors: validation.errors,
+      });
+    }
+
+    const { nama_jalur, persentase_kuota, id_syarat } = validation.data;
+    const { id_siswa } = req.body; // Optional field not in schema
 
     const [current] = await db.query(
       "SELECT id_siswa, id_syarat FROM jalur_ppdb WHERE id_jalur = ?",
@@ -229,7 +268,7 @@ router.put("/jalur/:id", authorize("jalur", "manage"), async (req, res) => {
     res.json({ success: true, message: "Jalur berhasil diperbarui." });
   } catch (err) {
     console.error("Update jalur error:", err);
-    res.status(500).json({ message: "Gagal memperbarui jalur." });
+    next(err);
   }
 });
 
@@ -259,7 +298,7 @@ router.delete("/jalur/:id", authorize("jalur", "manage"), async (req, res) => {
     res.json({ success: true, message: "Jalur berhasil dihapus." });
   } catch (err) {
     console.error("Delete jalur error:", err);
-    res.status(500).json({ message: "Gagal menghapus jalur." });
+    next(err);
   }
 });
 

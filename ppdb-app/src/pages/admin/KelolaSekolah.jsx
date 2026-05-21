@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import SidebarAdmin from "../../components/SidebarAdmin";
+import { API_BASE_URL } from "../../config/api";
 
 const SEKOLAH_AWAL = [
   { id: "ST01", npsn: "202001", nama: "SMA Negeri 1 Indramayu", jenjang: "SMA", kuota: 200, alamat: "Jl. MT Haryono No.1, Indramayu" },
@@ -30,8 +31,8 @@ export default function KelolaSekolah({ onNavigate }) {
   const loadData = async () => {
     try {
       const [resSekolah, resJalur] = await Promise.all([
-        fetch("http://localhost:5000/api/master/sekolah", { headers: authHeaders() }),
-        fetch("http://localhost:5000/api/master/jalur", { headers: authHeaders() }),
+        fetch(`${API_BASE_URL}/master/sekolah`, { headers: authHeaders() }),
+        fetch(`${API_BASE_URL}/master/jalur`, { headers: authHeaders() }),
       ]);
 
       if (!resSekolah.ok || !resJalur.ok) throw new Error("Gagal memuat data master.");
@@ -52,7 +53,7 @@ export default function KelolaSekolah({ onNavigate }) {
   const simpanSekolah = async () => {
     if (!editSekolah) return;
     try {
-      const res = await fetch(`http://localhost:5000/api/master/sekolah/${editSekolah.id}`, {
+      const res = await fetch(`${API_BASE_URL}/master/sekolah/${editSekolah.id}`, {
         method: "PUT",
         headers: authHeaders(),
         body: JSON.stringify({
@@ -78,7 +79,7 @@ export default function KelolaSekolah({ onNavigate }) {
   const hapusSekolah = async (id) => {
     if (!confirm("Hapus sekolah ini?")) return;
     try {
-      const res = await fetch(`http://localhost:5000/api/master/sekolah/${id}`, {
+      const res = await fetch(`${API_BASE_URL}/master/sekolah/${id}`, {
         method: "DELETE",
         headers: authHeaders(),
       });
@@ -104,7 +105,7 @@ export default function KelolaSekolah({ onNavigate }) {
     if (!alamat) return;
 
     try {
-      const res = await fetch("http://localhost:5000/api/master/sekolah", {
+      const res = await fetch(`${API_BASE_URL}/master/sekolah`, {
         method: "POST",
         headers: authHeaders(),
         body: JSON.stringify({
@@ -127,7 +128,7 @@ export default function KelolaSekolah({ onNavigate }) {
   const simpanJalur = async () => {
     if (!editJalur) return;
     try {
-      const res = await fetch(`http://localhost:5000/api/master/jalur/${editJalur.id}`, {
+      const res = await fetch(`${API_BASE_URL}/master/jalur/${editJalur.id}`, {
         method: "PUT",
         headers: authHeaders(),
         body: JSON.stringify({
@@ -150,7 +151,7 @@ export default function KelolaSekolah({ onNavigate }) {
   const hapusJalur = async (id) => {
     if (!confirm("Hapus jalur ini?")) return;
     try {
-      const res = await fetch(`http://localhost:5000/api/master/jalur/${id}`, {
+      const res = await fetch(`${API_BASE_URL}/master/jalur/${id}`, {
         method: "DELETE",
         headers: authHeaders(),
       });
@@ -170,7 +171,7 @@ export default function KelolaSekolah({ onNavigate }) {
     if (!kuota) return;
 
     try {
-      const res = await fetch("http://localhost:5000/api/master/jalur", {
+      const res = await fetch(`${API_BASE_URL}/master/jalur`, {
         method: "POST",
         headers: authHeaders(),
         body: JSON.stringify({

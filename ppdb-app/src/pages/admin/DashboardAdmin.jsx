@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import SidebarAdmin from "../../components/SidebarAdmin";
+import { API_BASE_URL } from "../../config/api";
 
 const STATS = [
   { label: "Total Pendaftar",     value: "248",  sub: "Tahun ajaran 2025/2026", color: "bg-blue-50 text-blue-700",   border: "border-blue-200" },
@@ -44,8 +45,11 @@ export default function DashboardAdmin({ onLogout, onNavigate }) {
   useEffect(() => {
     const fetchRingkasan = async () => {
       try {
-        const token = localStorage.getItem("ppdb_admin_token") || "admin-token-2025";
-        const res = await fetch("http://localhost:5000/api/pendaftaran/admin", {
+        const token = localStorage.getItem("ppdb_admin_token");
+        if (!token) {
+          throw new Error("Admin token tidak ditemukan. Silakan login kembali.");
+        }
+        const res = await fetch(`${API_BASE_URL}/pendaftaran/admin`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         if (!res.ok) return;

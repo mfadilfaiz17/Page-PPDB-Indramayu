@@ -92,7 +92,7 @@ export default function HasilSeleksi({ onKembali }) {
         //   nama_sekolah: "SMA Negeri 1 Indramayu",
         //   nama_jalur: "Zonasi"
         // }
-        const res = await fetch(`${BASE_URL}/hasil-seleksi`, {
+        const res = await fetch(`${API_BASE_URL}/hasil-seleksi`, {
           headers: { Authorization: `Bearer ${getToken()}` },
         });
         if (!res.ok) throw new Error("Gagal memuat hasil seleksi.");

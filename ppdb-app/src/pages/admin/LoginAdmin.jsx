@@ -1,6 +1,6 @@
 import { useState } from "react";
 import NoticeBox from "../../components/NoticeBox";
-import API_BASE_URL from "../../config/api";
+import { API_BASE_URL } from "../../config/api";
 
 export default function LoginAdmin({ onLoginBerhasil, onKeSiswa }) {
   const [form, setForm]     = useState({ username: "", password: "" });

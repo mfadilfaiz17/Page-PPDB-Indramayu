@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import SidebarAdmin from "../../components/SidebarAdmin";
-
-const BASE_URL = "http://localhost:5000/api";
+import { API_BASE_URL } from "../../config/api";
 
 function StatusBadge({ status }) {
   const map = {
@@ -27,7 +26,7 @@ export default function VerifikasiDokumen({ onNavigate }) {
         if (!token) {
           throw new Error("Admin token tidak ditemukan. Silakan login kembali.");
         }
-        const resPendaftar = await fetch(`${BASE_URL}/pendaftaran/admin`, {
+        const resPendaftar = await fetch(`${API_BASE_URL}/pendaftaran/admin`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         if (!resPendaftar.ok) throw new Error("Gagal memuat data pendaftar");

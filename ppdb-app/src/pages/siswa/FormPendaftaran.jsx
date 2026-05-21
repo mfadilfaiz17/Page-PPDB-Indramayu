@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import NoticeBox from "../../components/NoticeBox";
-import API_BASE_URL from "../../config/api";
+import { API_BASE_URL } from "../../config/api";
 
 // ─────────────────────────────────────────────
 //  DATA STATIS (dari ERD: Sekolah_Tujuan & Jalur_Daftar)

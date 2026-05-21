@@ -84,7 +84,7 @@ router.get("/", auth, async (req, res) => {
 
   } catch (err) {
     console.error("Dashboard error:", err);
-    res.status(500).json({ message: "Terjadi kesalahan server." });
+    next(err);
   }
 });
 

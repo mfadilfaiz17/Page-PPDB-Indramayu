@@ -42,7 +42,7 @@ router.get("/opsi", auth, async (req, res) => {
     });
   } catch (err) {
     console.error("Opsi pendaftaran error:", err);
-    res.status(500).json({ message: "Gagal memuat opsi pendaftaran." });
+    next(err);
   }
 });
 
@@ -76,7 +76,7 @@ router.get("/admin", requireAdmin, async (req, res) => {
     res.json(rows);
   } catch (err) {
     console.error("Admin pendaftaran error:", err);
-    res.status(500).json({ message: "Gagal memuat data pendaftaran." });
+    next(err);
   }
 });
 
@@ -230,7 +230,7 @@ router.post(
 
     } catch (err) {
       console.error("Pendaftaran error:", err);
-      res.status(500).json({ message: "Terjadi kesalahan server." });
+      next(err);
     }
   }
 );

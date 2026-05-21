@@ -1,6 +1,6 @@
 import { useState } from "react";
 import NoticeBox from "../../components/NoticeBox";
-import API_BASE_URL from "../../config/api";
+import { API_BASE_URL } from "../../config/api";
 
 function InputField({ label, required, hint, type = "text", ...props }) {
   return (

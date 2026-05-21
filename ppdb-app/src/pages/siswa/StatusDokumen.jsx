@@ -159,7 +159,7 @@ export default function StatusDokumen({ onKembali }) {
         // GET /api/dokumen
         // Header: Authorization: Bearer <token>
         // Response: [ { id_jenis_dokumen, status_dokumen }, ... ]
-        const res = await fetch(`${BASE_URL}/dokumen`, {
+        const res = await fetch(`${API_BASE_URL}/dokumen`, {
           headers: { Authorization: `Bearer ${getToken()}` },
         });
         if (!res.ok) throw new Error("Gagal memuat data dokumen.");
@@ -198,7 +198,7 @@ export default function StatusDokumen({ onKembali }) {
       // POST /api/dokumen/upload
       // Body: FormData { id_jenis_dokumen, file }
       // Response: { success: true, status_dokumen: "TERUPLOAD" }
-      const res = await fetch(`${BASE_URL}/dokumen/upload`, {
+      const res = await fetch(`${API_BASE_URL}/dokumen/upload`, {
         method: "POST",
         headers: { Authorization: `Bearer ${getToken()}` },
         body: formData,

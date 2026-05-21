@@ -140,7 +140,7 @@ export default function Dashboard({ onLogout, onKeDaftar, onKeStatus, onKeHasil 
         //   dokumen: [ { nama_dokumen, status_dokumen }, ... ],
         //   hasil: { status_hasil, peringkat, tanggal_pengumuman } | null
         // }
-        const res = await fetch(`${BASE_URL}/dashboard`, {
+        const res = await fetch(`${API_BASE_URL}/dashboard`, {
           headers: { Authorization: `Bearer ${getToken()}` },
         });
         if (!res.ok) throw new Error("Gagal memuat data dashboard.");

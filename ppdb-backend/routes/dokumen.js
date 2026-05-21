@@ -59,7 +59,7 @@ router.get("/", auth, async (req, res) => {
     })));
   } catch (err) {
     console.error("Get dokumen error:", err);
-    res.status(500).json({ message: "Terjadi kesalahan server." });
+    next(err);
   }
 });
 
@@ -110,7 +110,7 @@ router.post("/upload", auth, upload.single("file"), async (req, res) => {
 
   } catch (err) {
     console.error("Upload dokumen error:", err);
-    res.status(500).json({ message: "Terjadi kesalahan server." });
+    next(err);
   }
 });
 

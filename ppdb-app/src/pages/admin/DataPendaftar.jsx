@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import SidebarAdmin from "../../components/SidebarAdmin";
+import { API_BASE_URL } from "../../config/api";
 
 const DATA_DUMMY = [
   { id: "S01", nama: "Arda Guler",     nisn: "0011223344", asal: "SMP N 1 Indramayu", jalur: "Zonasi",   sekolah: "SMAN 1 Indramayu", nilai: 88.5, status: "Lulus" },
@@ -30,7 +31,7 @@ export default function DataPendaftar({ onNavigate }) {
     const fetchData = async () => {
       try {
         const token = localStorage.getItem("ppdb_token") || "";
-        const res = await fetch("http://localhost:5000/api/pendaftaran/admin", {
+        const res = await fetch(`${API_BASE_URL}/pendaftaran/admin`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         if (!res.ok) throw new Error("Gagal memuat data pendaftar.");
