@@ -229,7 +229,7 @@ router.post("/admin-login", authLimiter, auditAuthAttempt("admin"), async (req, 
     await ensureAdminTable();
 
     const [rows] = await db.query(
-      "SELECT id_admin, username, `password`, nama_admin FROM admin_ppdb WHERE username = ? LIMIT 1",
+      "SELECT id_admin, username, `password`, nama_admin, id_role FROM admin_ppdb WHERE username = ? LIMIT 1",
       [trimmedUsername]
     );
 
@@ -247,11 +247,12 @@ router.post("/admin-login", authLimiter, auditAuthAttempt("admin"), async (req, 
       return res.status(401).json({ message: "Username atau password salah." });
     }
 
-    // Buat JWT token untuk admin (sama seperti student)
+    // Buat JWT token untuk admin dengan role information
     const adminToken = jwt.sign(
       {
         id_admin: admin.id_admin,
         username: admin.username,
+        id_role: admin.id_role || "R001",
         role: "admin",
       },
       process.env.JWT_SECRET,
@@ -265,6 +266,7 @@ router.post("/admin-login", authLimiter, auditAuthAttempt("admin"), async (req, 
         id_admin: admin.id_admin,
         username: admin.username,
         nama_admin: admin.nama_admin,
+        id_role: admin.id_role || "R001",
         role: "admin",
       },
     });

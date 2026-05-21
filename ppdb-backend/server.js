@@ -4,6 +4,8 @@ const helmet     = require("helmet");
 const path       = require("path");
 require("dotenv").config({ path: path.join(__dirname, ".env") });
 
+const { initializeRBAC } = require("./services/rbacService");
+
 const app = express();
 
 // ─────────────────────────────────────────────
@@ -75,7 +77,13 @@ app.use((err, req, res, next) => {
 //  JALANKAN SERVER
 // ─────────────────────────────────────────────
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`🚀 Server berjalan di http://localhost:${PORT}`);
-  console.log(`📁 Uploads tersimpan di folder: uploads/`);
+app.listen(PORT, async () => {
+  try {
+    await initializeRBAC();
+    console.log(`🚀 Server berjalan di http://localhost:${PORT}`);
+    console.log(`📁 Uploads tersimpan di folder: uploads/`);
+  } catch (err) {
+    console.error("❌ Server startup failed:", err.message);
+    process.exit(1);
+  }
 });
