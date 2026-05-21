@@ -237,10 +237,4 @@ email-test-*.html
 # ============================================
 # Dokumentasi PPDB yang Dibuang dari GitHub
 # ============================================
-BACKEND_IMPROVEMENTS.md
-EMAIL_SERVICE_USAGE.md
-FRONTEND_IMPROVEMENTS.md
-ppdb-app/HTTP_CLIENT_GUIDE.md
-ppdb-backend/API_DOCUMENTATION.md
-ppdb-feature-audit.md
-PROGRESS_TRACKER.md
+AGENTS.md
