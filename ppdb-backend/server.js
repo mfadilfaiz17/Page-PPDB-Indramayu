@@ -35,6 +35,7 @@ app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 // ─────────────────────────────────────────────
 //  ROUTES
 // ─────────────────────────────────────────────
+app.use("/health",            require("./routes/health"));
 app.use("/api/auth",          require("./routes/auth"));
 app.use("/api/dashboard",     require("./routes/dashboard"));
 app.use("/api/pendaftaran",   require("./routes/pendaftaran"));
@@ -47,7 +48,9 @@ app.get("/", (req, res) => {
   res.json({
     message: "✅ Server PPDB Indramayu berjalan!",
     versi:   "1.0.0",
+    health_check: "GET /health",
     endpoints: [
+      "GET  /health",
       "POST /api/auth/register",
       "POST /api/auth/login",
       "POST /api/auth/admin-login",
