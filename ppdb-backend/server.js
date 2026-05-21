@@ -1,9 +1,17 @@
 const express    = require("express");
 const cors       = require("cors");
+const helmet     = require("helmet");
 const path       = require("path");
 require("dotenv").config({ path: path.join(__dirname, ".env") });
 
 const app = express();
+
+// ─────────────────────────────────────────────
+//  SECURITY MIDDLEWARE
+// ─────────────────────────────────────────────
+
+// Add security headers (CSP, XFO, HSTS, etc)
+app.use(helmet());
 
 // ─────────────────────────────────────────────
 //  MIDDLEWARE GLOBAL
