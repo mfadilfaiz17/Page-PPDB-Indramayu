@@ -261,9 +261,6 @@ PPDB-Indramayu/
 │   └── server.js                  # Express server
 │
 ├── PROGRESS_TRACKER.md            # Project progress tracking
-├── BACKEND_IMPROVEMENTS.md        # Backend improvement plan
-├── FRONTEND_IMPROVEMENTS.md       # Frontend improvement plan
-├── AGENTS.md                      # Agent guidelines
 └── README.md                      # This file
 ```
 
