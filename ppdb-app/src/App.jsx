@@ -35,9 +35,11 @@ export default function App() {
   const handleLoginSiswa = (d) => { setSiswa(d); setHalaman("dashboard"); };
   const handleLoginAdmin = ()  => setHalaman("admin.dashboard");
   const handleLogout     = ()  => {
-    localStorage.clear();
-    setSiswa(null);
-    setHalaman("auth");
+   // Remove only app-specific keys, not all localStorage data
+   const keysToRemove = ["ppdb_token", "ppdb_siswa", "ppdb_admin_token", "ppdb_admin"];
+   keysToRemove.forEach(key => localStorage.removeItem(key));
+   setSiswa(null);
+   setHalaman("auth");
   };
 
   const isSiswaLoggedIn = Boolean(siswaToken && siswaLokal);

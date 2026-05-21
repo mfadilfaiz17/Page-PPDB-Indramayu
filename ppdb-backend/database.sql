@@ -107,7 +107,8 @@ CREATE TABLE IF NOT EXISTS `dokumen` (
   `id_dokumen` varchar(6) NOT NULL,
   `id_siswa` varchar(6) NOT NULL,
   `id_jenis_dokumen` varchar(6) NOT NULL,
-  `status` varchar(20) NOT NULL,
+  `status_dokumen` varchar(20) NOT NULL,
+  `file_path` varchar(255) NOT NULL,
   PRIMARY KEY (`id_dokumen`),
   KEY `fk_dokumen_ke_jenis` (`id_jenis_dokumen`),
   KEY `fk_dokumen_ke_siswa` (`id_siswa`)
@@ -117,12 +118,12 @@ CREATE TABLE IF NOT EXISTS `dokumen` (
 -- Dumping data for table `dokumen`
 --
 
-INSERT INTO `dokumen` (`id_dokumen`, `id_siswa`, `id_jenis_dokumen`, `status`) VALUES
-('D01', 'S01', 'JD01', 'TERUPLOAD'),
-('D02', 'S01', 'JD02', 'TERUPLOAD'),
-('D03', 'S01', 'JD03', 'TERUPLOAD'),
-('D04', 'S01', 'JD04', 'TERUPLOAD'),
-('D05', 'S01', 'JD05', 'TERUPLOAD');
+INSERT INTO `dokumen` (`id_dokumen`, `id_siswa`, `id_jenis_dokumen`, `status_dokumen`, `file_path`) VALUES
+('D01', 'S01', 'JD01', 'TERUPLOAD', '/uploads/S01_1234567890.pdf'),
+('D02', 'S01', 'JD02', 'TERUPLOAD', '/uploads/S01_1234567891.pdf'),
+('D03', 'S01', 'JD03', 'TERUPLOAD', '/uploads/S01_1234567892.pdf'),
+('D04', 'S01', 'JD04', 'TERUPLOAD', '/uploads/S01_1234567893.pdf'),
+('D05', 'S01', 'JD05', 'TERUPLOAD', '/uploads/S01_1234567894.pdf');
 
 -- --------------------------------------------------------
 
@@ -248,27 +249,25 @@ DROP TABLE IF EXISTS `sekolah_tujuan`;
 CREATE TABLE IF NOT EXISTS `sekolah_tujuan` (
   `id_sekolah` varchar(6) NOT NULL,
   `id_siswa` varchar(6) NOT NULL,
-  `id_jalur` varchar(6) NOT NULL,
   `npsn` int(6) NOT NULL,
   `nama_sekolah` varchar(50) NOT NULL,
   `jenjang` varchar(5) NOT NULL,
   `kuota` int(11) NOT NULL,
   `alamat_sekolah` varchar(100) NOT NULL,
   PRIMARY KEY (`id_sekolah`),
-  KEY `fk_sekolah_ke_siswa` (`id_siswa`),
-  KEY `fk_sekolah_ke_jalur` (`id_jalur`)
+  KEY `fk_sekolah_ke_siswa` (`id_siswa`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `sekolah_tujuan`
 --
 
-INSERT INTO `sekolah_tujuan` (`id_sekolah`, `id_siswa`, `id_jalur`, `npsn`, `nama_sekolah`, `jenjang`, `kuota`, `alamat_sekolah`) VALUES
-('ST01', 'S01', 'J01', 202001, 'SMA Negeri 1 Indramayu', 'SMA', 200, 'Jl. Gatot Subroto No.1 Indramayu'),
-('ST02', 'S02', 'J02', 202002, 'SMA Negeri 2 Indramayu', 'SMA', 180, 'Jl. Sudirman No.10 Indramayu'),
-('ST03', 'S03', 'J03', 202003, 'SMK Negeri 1 Indramayu', 'SMK', 220, 'Jl. Veteran No.5 Indramayu'),
-('ST04', 'S04', 'J04', 202004, 'SMK Negeri 2 Indramayu', 'SMK', 210, 'Jl. Diponegoro No.8 Indramayu'),
-('ST05', 'S05', 'J05', 202005, 'SMA Negeri 1 Indramayu', 'SMA', 200, 'Jl. Gatot Subroto No.1 Indramayu');
+INSERT INTO `sekolah_tujuan` (`id_sekolah`, `id_siswa`, `npsn`, `nama_sekolah`, `jenjang`, `kuota`, `alamat_sekolah`) VALUES
+('ST01', 'S01', 202001, 'SMA Negeri 1 Indramayu', 'SMA', 200, 'Jl. Gatot Subroto No.1 Indramayu'),
+('ST02', 'S02', 202002, 'SMA Negeri 2 Indramayu', 'SMA', 180, 'Jl. Sudirman No.10 Indramayu'),
+('ST03', 'S03', 202003, 'SMK Negeri 1 Indramayu', 'SMK', 220, 'Jl. Veteran No.5 Indramayu'),
+('ST04', 'S04', 202004, 'SMK Negeri 2 Indramayu', 'SMK', 210, 'Jl. Diponegoro No.8 Indramayu'),
+('ST05', 'S05', 202005, 'SMA Negeri 1 Indramayu', 'SMA', 200, 'Jl. Gatot Subroto No.1 Indramayu');
 
 -- --------------------------------------------------------
 
@@ -364,7 +363,6 @@ ALTER TABLE `periode_ppdb`
 -- Constraints for table `sekolah_tujuan`
 --
 ALTER TABLE `sekolah_tujuan`
-  ADD CONSTRAINT `fk_sekolah_ke_jalur` FOREIGN KEY (`id_jalur`) REFERENCES `jalur_ppdb` (`id_jalur`),
   ADD CONSTRAINT `fk_sekolah_ke_siswa` FOREIGN KEY (`id_siswa`) REFERENCES `siswa` (`id_siswa`);
 
 --
