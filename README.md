@@ -425,12 +425,6 @@ Kontribusi welcome! Silakan:
 
 ---
 
-## 📄 License
-
-MIT License - see [LICENSE](./LICENSE) file for details
-
----
-
 ## 👨‍💻 Team
 
 **Developer:** ZORA  
