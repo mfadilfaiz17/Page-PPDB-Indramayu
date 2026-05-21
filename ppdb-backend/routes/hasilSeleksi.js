@@ -1,17 +1,9 @@
 const express = require("express");
 const db      = require("../config/database");
 const auth    = require("../middleware/auth");
+const requireAdmin = require("../middleware/requireAdmin");
 
 const router = express.Router();
-
-function requireAdmin(req, res, next) {
-  const authHeader = req.headers.authorization || "";
-  const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : authHeader;
-  if (token !== "admin-token-2025") {
-    return res.status(401).json({ message: "Akses admin tidak valid." });
-  }
-  next();
-}
 
 async function getNextId(prefix, tabel, kolom) {
   const q = `SELECT MAX(CAST(SUBSTRING(${kolom}, 2) AS UNSIGNED)) AS maxnum FROM ${tabel}`;

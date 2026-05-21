@@ -251,9 +251,20 @@ router.post("/admin-login", authLimiter, async (req, res) => {
       return res.status(401).json({ message: "Username atau password salah." });
     }
 
+    // Buat JWT token untuk admin (sama seperti student)
+    const adminToken = jwt.sign(
+      {
+        id_admin: admin.id_admin,
+        username: admin.username,
+        role: "admin",
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: process.env.JWT_EXPIRES_IN }
+    );
+
     res.json({
       success: true,
-      token: "admin-token-2025",
+      token: adminToken,
       admin: {
         id_admin: admin.id_admin,
         username: admin.username,

@@ -1,22 +1,12 @@
 const express = require("express");
 const db      = require("../config/database");
 const auth    = require("../middleware/auth");
+const requireAdmin = require("../middleware/requireAdmin");
 const multer  = require("multer");
 const path    = require("path");
 const fs      = require("fs");
 
 const router = express.Router();
-
-function requireAdmin(req, res, next) {
-  const authHeader = req.headers.authorization || "";
-  const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : authHeader;
-
-  if (token !== "admin-token-2025") {
-    return res.status(401).json({ message: "Akses admin tidak valid." });
-  }
-
-  next();
-}
 
 // ─────────────────────────────────────────────
 //  GET /api/pendaftaran/opsi
@@ -27,14 +17,12 @@ router.get("/opsi", auth, async (req, res) => {
     const [jalurRows] = await db.query(
       `SELECT id_jalur, nama_jalur, persentase_kuota
        FROM jalur_ppdb
-       GROUP BY id_jalur, nama_jalur, persentase_kuota
        ORDER BY id_jalur ASC`
     );
 
     const [sekolahRows] = await db.query(
-      `SELECT id_sekolah, id_jalur, nama_sekolah, jenjang, kuota
+      `SELECT id_sekolah, nama_sekolah, jenjang, kuota, alamat_sekolah
        FROM sekolah_tujuan
-       GROUP BY id_sekolah, id_jalur, nama_sekolah, jenjang, kuota
        ORDER BY id_sekolah ASC`
     );
 
@@ -178,8 +166,8 @@ router.post(
         );
 
         await db.query(
-          "UPDATE sekolah_tujuan SET id_siswa = ?, id_jalur = ? WHERE id_sekolah = ?",
-          [id_siswa, id_jalur, id_sekolah]
+          "UPDATE sekolah_tujuan SET id_siswa = ? WHERE id_sekolah = ?",
+          [id_siswa, id_sekolah]
         );
       }
 

@@ -1,18 +1,8 @@
 const express = require("express");
 const db = require("../config/database");
+const requireAdmin = require("../middleware/requireAdmin");
 
 const router = express.Router();
-
-function requireAdmin(req, res, next) {
-  const authHeader = req.headers.authorization || "";
-  const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : authHeader;
-
-  if (token !== "admin-token-2025") {
-    return res.status(401).json({ message: "Akses admin tidak valid." });
-  }
-
-  next();
-}
 
 async function getNextId(prefix, table, column) {
   const [rows] = await db.query(
@@ -38,7 +28,6 @@ function mapSekolah(row) {
   return {
     id: row.id_sekolah,
     id_sekolah: row.id_sekolah,
-    id_jalur: row.id_jalur,
     npsn: row.npsn,
     nama: row.nama_sekolah,
     nama_sekolah: row.nama_sekolah,
@@ -67,7 +56,7 @@ router.use(requireAdmin);
 router.get("/sekolah", async (req, res) => {
   try {
     const [rows] = await db.query(
-      `SELECT id_sekolah, id_siswa, id_jalur, npsn, nama_sekolah, jenjang, kuota, alamat_sekolah
+      `SELECT id_sekolah, id_siswa, npsn, nama_sekolah, jenjang, kuota, alamat_sekolah
        FROM sekolah_tujuan
        ORDER BY id_sekolah ASC`
     );
@@ -80,7 +69,7 @@ router.get("/sekolah", async (req, res) => {
 
 router.post("/sekolah", async (req, res) => {
   try {
-    const { npsn, nama_sekolah, jenjang, kuota, alamat_sekolah, id_siswa, id_jalur } = req.body;
+    const { npsn, nama_sekolah, jenjang, kuota, alamat_sekolah, id_siswa } = req.body;
 
     if (!npsn || !nama_sekolah || !jenjang || !kuota || !alamat_sekolah) {
       return res.status(400).json({ message: "Semua field sekolah wajib diisi." });
@@ -91,12 +80,11 @@ router.post("/sekolah", async (req, res) => {
 
     await db.query(
       `INSERT INTO sekolah_tujuan
-        (id_sekolah, id_siswa, id_jalur, npsn, nama_sekolah, jenjang, kuota, alamat_sekolah)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?)` ,
+        (id_sekolah, id_siswa, npsn, nama_sekolah, jenjang, kuota, alamat_sekolah)
+       VALUES (?, ?, ?, ?, ?, ?, ?)` ,
       [
         id_sekolah,
         id_siswa || refs.id_siswa,
-        id_jalur || refs.id_jalur,
         npsn,
         nama_sekolah,
         jenjang,
@@ -115,10 +103,10 @@ router.post("/sekolah", async (req, res) => {
 router.put("/sekolah/:id", async (req, res) => {
   try {
     const { id } = req.params;
-    const { npsn, nama_sekolah, jenjang, kuota, alamat_sekolah, id_siswa, id_jalur } = req.body;
+    const { npsn, nama_sekolah, jenjang, kuota, alamat_sekolah, id_siswa } = req.body;
 
     const [current] = await db.query(
-      "SELECT id_siswa, id_jalur FROM sekolah_tujuan WHERE id_sekolah = ?",
+      "SELECT id_siswa FROM sekolah_tujuan WHERE id_sekolah = ?",
       [id]
     );
     if (current.length === 0) {
@@ -127,7 +115,7 @@ router.put("/sekolah/:id", async (req, res) => {
 
     await db.query(
       `UPDATE sekolah_tujuan
-       SET npsn = ?, nama_sekolah = ?, jenjang = ?, kuota = ?, alamat_sekolah = ?, id_siswa = ?, id_jalur = ?
+       SET npsn = ?, nama_sekolah = ?, jenjang = ?, kuota = ?, alamat_sekolah = ?, id_siswa = ?
        WHERE id_sekolah = ?`,
       [
         npsn,
@@ -136,7 +124,6 @@ router.put("/sekolah/:id", async (req, res) => {
         kuota,
         alamat_sekolah,
         id_siswa || current[0].id_siswa,
-        id_jalur || current[0].id_jalur,
         id,
       ]
     );
