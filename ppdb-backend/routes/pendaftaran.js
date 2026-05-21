@@ -2,6 +2,7 @@ const express = require("express");
 const db      = require("../config/database");
 const auth    = require("../middleware/auth");
 const requireAdmin = require("../middleware/requireAdmin");
+const { generateId } = require("../utils/idGenerator");
 const multer  = require("multer");
 const path    = require("path");
 const fs      = require("fs");
@@ -106,14 +107,8 @@ const upload = multer({
   },
 });
 
-// Helper: generate ID
-async function getNextId(prefix, tabel, kolom) {
-  const q = `SELECT MAX(CAST(SUBSTRING(${kolom}, 2) AS UNSIGNED)) AS maxnum FROM ${tabel}`;
-  const [rows] = await db.query(q);
-  const maxNum = rows[0].maxnum || 0;
-  const next = Number(maxNum) + 1;
-  return `${prefix}${String(next).padStart(2, "0")}`;
-}
+// Helper: generate ID - Moved to utils/idGenerator.js
+
 
 // ─────────────────────────────────────────────
 //  POST /api/pendaftaran
@@ -157,7 +152,7 @@ router.post(
         [id_siswa]
       );
 
-      const id_pendaftaran = existingPendaftaran[0]?.id_pendaftaran || await getNextId("R", "pendaftaran", "id_pendaftaran");
+      const id_pendaftaran = existingPendaftaran[0]?.id_pendaftaran || generateId("R");
 
       if (id_jalur && id_sekolah) {
         await db.query(
@@ -176,7 +171,7 @@ router.post(
       for (const [key, idJenis] of Object.entries(JENIS_DOKUMEN)) {
         if (files[key] && files[key][0]) {
           const file      = files[key][0];
-          const id_dok    = await getNextId("D", "dokumen", "id_dokumen");
+          const id_dok    = generateId("D");
           const file_path = `/uploads/${file.filename}`;
           await db.query(
             `INSERT INTO dokumen (id_dokumen, id_siswa, id_jenis_dokumen, status_dokumen, file_path)
@@ -199,7 +194,7 @@ router.post(
           [periodeAktif.tahun_ajaran, periodeAktif.tanggal_selesai, id_siswa]
         );
       } else {
-        const id_periode = await getNextId("P", "periode_ppdb", "id_periode");
+        const id_periode = generateId("P");
         await db.query(
           `INSERT INTO periode_ppdb
             (id_periode, id_siswa, tahun_ajaran, tanggal_mulai, tanggal_selesai)

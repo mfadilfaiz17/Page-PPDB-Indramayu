@@ -4,6 +4,7 @@ const jwt     = require("jsonwebtoken");
 const db      = require("../config/database");
 const { authLimiter } = require("../middleware/rateLimiter");
 const { auditAuthAttempt } = require("../middleware/auditLog");
+const { generateId } = require("../utils/idGenerator");
 require("dotenv").config();
 
 const router = express.Router();
@@ -21,16 +22,10 @@ function hitungUsia(tanggalLahir) {
 
 // ─────────────────────────────────────────────
 //  Helper: generate ID otomatis
-//  Contoh: getNextId("A", "Akun_PPDB", "id_akun") → "A06"
+//  Uses UUID-based generation for security
 // ─────────────────────────────────────────────
-async function getNextId(prefix, tabel, kolom) {
-  // Ambil nilai numerik tertinggi dari kolom yang berformat PREFIXNN
-  const q = `SELECT MAX(CAST(SUBSTRING(${kolom}, 2) AS UNSIGNED)) AS maxnum FROM ${tabel}`;
-  const [rows] = await db.query(q);
-  const maxNum = rows[0].maxnum || 0;
-  const next = Number(maxNum) + 1;
-  return `${prefix}${String(next).padStart(2, "0")}`;
-}
+// Removed - see utils/idGenerator.js
+
 
 async function ensureAdminTable() {
   await db.query(`CREATE TABLE IF NOT EXISTS admin_ppdb (
@@ -101,8 +96,8 @@ router.post("/register", authLimiter, auditAuthAttempt("student"), async (req, r
     const hashedPassword = await bcrypt.hash(password.trim(), 10);
 
     // Generate ID
-    const id_akun  = await getNextId("A",  "akun_ppdb", "id_akun");
-    const id_siswa = await getNextId("S",  "siswa",     "id_siswa");
+    const id_akun  = generateId("A");
+    const id_siswa = generateId("S");
     const alamatLengkap = [alamat_siswa, desa, kecamatan].filter(Boolean).join(", ");
     const usia = hitungUsia(tanggal_lahir);
 

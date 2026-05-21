@@ -1,16 +1,13 @@
 const express = require("express");
 const db = require("../config/database");
 const requireAdmin = require("../middleware/requireAdmin");
+const { generateId } = require("../utils/idGenerator");
 
 const router = express.Router();
 
-async function getNextId(prefix, table, column) {
-  const [rows] = await db.query(
-    `SELECT MAX(CAST(SUBSTRING(${column}, 2) AS UNSIGNED)) AS maxnum FROM ${table}`
-  );
-  const next = Number(rows[0]?.maxnum || 0) + 1;
-  return `${prefix}${String(next).padStart(2, "0")}`;
-}
+
+// getNextId moved to utils/idGenerator.js
+
 
 async function getDefaultRefs() {
   const [siswaRows] = await db.query("SELECT id_siswa FROM siswa ORDER BY id_siswa ASC LIMIT 1");
@@ -76,7 +73,7 @@ router.post("/sekolah", async (req, res) => {
     }
 
     const refs = await getDefaultRefs();
-    const id_sekolah = await getNextId("ST", "sekolah_tujuan", "id_sekolah");
+    const id_sekolah = generateId("ST");
 
     await db.query(
       `INSERT INTO sekolah_tujuan
@@ -180,7 +177,7 @@ router.post("/jalur", async (req, res) => {
     }
 
     const refs = await getDefaultRefs();
-    const id_jalur = await getNextId("J", "jalur_ppdb", "id_jalur");
+    const id_jalur = generateId("J");
 
     await db.query(
       `INSERT INTO jalur_ppdb

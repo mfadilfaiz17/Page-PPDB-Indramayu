@@ -1,6 +1,7 @@
 const express = require("express");
 const db      = require("../config/database");
 const auth    = require("../middleware/auth");
+const { generateId } = require("../utils/idGenerator");
 const multer  = require("multer");
 const path    = require("path");
 const fs      = require("fs");
@@ -31,14 +32,8 @@ const upload = multer({
   },
 });
 
-// Helper: generate ID
-async function getNextId(prefix, tabel, kolom) {
-  const q = `SELECT MAX(CAST(SUBSTRING(${kolom}, 2) AS UNSIGNED)) AS maxnum FROM ${tabel}`;
-  const [rows] = await db.query(q);
-  const maxNum = rows[0].maxnum || 0;
-  const next = Number(maxNum) + 1;
-  return `${prefix}${String(next).padStart(2, "0")}`;
-}
+// getNextId moved to utils/idGenerator.js
+
 
 // ─────────────────────────────────────────────
 //  GET /api/dokumen
@@ -98,7 +93,7 @@ router.post("/upload", auth, upload.single("file"), async (req, res) => {
       );
     } else {
       // Insert baru
-      const id_dok = await getNextId("D", "dokumen", "id_dokumen");
+      const id_dok = generateId("D");
       await db.query(
         `INSERT INTO dokumen (id_dokumen, id_siswa, id_jenis_dokumen, status_dokumen, file_path)
          VALUES (?, ?, ?, 'TERUPLOAD', ?)`,

@@ -2,16 +2,9 @@ const express = require("express");
 const db      = require("../config/database");
 const auth    = require("../middleware/auth");
 const requireAdmin = require("../middleware/requireAdmin");
+const { generateId } = require("../utils/idGenerator");
 
 const router = express.Router();
-
-async function getNextId(prefix, tabel, kolom) {
-  const q = `SELECT MAX(CAST(SUBSTRING(${kolom}, 2) AS UNSIGNED)) AS maxnum FROM ${tabel}`;
-  const [rows] = await db.query(q);
-  const maxNum = rows[0].maxnum || 0;
-  const next = Number(maxNum) + 1;
-  return `${prefix}${String(next).padStart(2, "0")}`;
-}
 
 // ─────────────────────────────────────────────
 //  GET /api/hasil-seleksi
@@ -107,7 +100,7 @@ router.post("/", requireAdmin, async (req, res) => {
       );
     } else {
       // Insert baru
-      const id_hasil = await getNextId("H", "hasil_seleksi", "id_hasil");
+      const id_hasil = generateId("H");
       await db.query(
         `INSERT INTO hasil_seleksi (id_hasil, id_siswa, id_sekolah, id_jalur, status_hasil, peringkat, tanggal_pengumuman)
          VALUES (?, ?, ?, ?, ?, ?, ?)`,
