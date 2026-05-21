@@ -1,7 +1,6 @@
 import { useState } from "react";
 import NoticeBox from "../../components/NoticeBox";
-
-const BASE_URL = "http://localhost:5000/api";
+import API_BASE_URL from "../../config/api";
 
 function InputField({ label, required, hint, type = "text", ...props }) {
   return (
@@ -88,7 +87,7 @@ function HalamanLogin({ onSuksesLogin, onKeRegister }) {
 
     setLoading(true);
     try {
-      const res = await fetch(`${BASE_URL}/auth/login`, {
+      const res = await fetch(`${API_BASE_URL}/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: form.email, password: form.password }),
@@ -236,7 +235,7 @@ function HalamanRegister({ onSuksesRegister, onKeLogin }) {
     setLoading(true);
     try {
       const { konfirmasi_password, ...payload } = form;
-      const res = await fetch(`${BASE_URL}/auth/register`, {
+      const res = await fetch(`${API_BASE_URL}/auth/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),

@@ -1,7 +1,6 @@
 import { useState } from "react";
 import NoticeBox from "../../components/NoticeBox";
-
-const BASE_URL = "http://localhost:5000/api";
+import API_BASE_URL from "../../config/api";
 
 export default function LoginAdmin({ onLoginBerhasil, onKeSiswa }) {
   const [form, setForm]     = useState({ username: "", password: "" });
@@ -19,7 +18,7 @@ export default function LoginAdmin({ onLoginBerhasil, onKeSiswa }) {
     setError("");
 
     try {
-      const res = await fetch(`${BASE_URL}/auth/admin-login`, {
+      const res = await fetch(`${API_BASE_URL}/auth/admin-login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),

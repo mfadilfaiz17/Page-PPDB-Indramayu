@@ -1,11 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import NoticeBox from "../../components/NoticeBox";
-
-// ─────────────────────────────────────────────
-//  KONFIGURASI API
-//  Ganti BASE_URL sesuai alamat server Express.js
-// ─────────────────────────────────────────────
-const BASE_URL = "http://localhost:5000/api";
+import API_BASE_URL from "../../config/api";
 
 // ─────────────────────────────────────────────
 //  DATA STATIS (dari ERD: Sekolah_Tujuan & Jalur_Daftar)
@@ -232,14 +227,12 @@ function LangkahSatu({ data, onChange }) {
 //  LANGKAH 2: Jalur & Sekolah Tujuan
 // ─────────────────────────────────────────────
 function LangkahDua({ data, onChange, jalurList, sekolahList, periodeText, loadingOpsi }) {
-  // Filter jalur berdasarkan sekolah yang dipilih
+  // Tampilkan semua jalur ketika sekolah dipilih
+  // Setiap sekolah memiliki akses ke 4 jalur yang sama
   const jalurUntukSekolahDipilih = useMemo(() => {
     if (!data.sekolah) return [];
-    const sekolahDipilih = sekolahList.find(s => s.id_sekolah === data.sekolah);
-    if (!sekolahDipilih) return [];
-    // Return semua jalur yang id_jalurnya sama dengan sekolah yang dipilih
-    return jalurList.filter(j => j.id_jalur === sekolahDipilih.id_jalur);
-  }, [data.sekolah, sekolahList, jalurList]);
+    return jalurList; // Tampilkan semua 4 jalur standar untuk setiap sekolah
+  }, [data.sekolah, jalurList]);
 
   const isCustom = !!data.jalur_custom || !!data.sekolah_custom;
 
@@ -722,7 +715,7 @@ async function kirimPendaftaran(dataDiri, dataPilihan, files) {
 
   const token = localStorage.getItem("ppdb_token") || "";
 
-  const res = await fetch(`${BASE_URL}/pendaftaran`, {
+  const res = await fetch(`${API_BASE_URL}/pendaftaran`, {
     method: "POST",
     headers: token ? { Authorization: `Bearer ${token}` } : {},
     body: formData,
@@ -772,7 +765,6 @@ export default function FormPendaftaran({ onKembali, onSelesai }) {
   const [opsiSekolah, setOpsiSekolah] = useState(
     SEKOLAH_FALLBACK.map((s, idx) => ({
       id_sekolah: s.value,
-      id_jalur: JALUR_FALLBACK[idx]?.value || "",
       nama_sekolah: s.label.split(" — ")[0],
       jenjang: s.label.includes("SMK") ? "SMK" : "SMA",
       kuota: Number((s.label.match(/Kuota:\s*(\d+)/)?.[1]) || 0),
@@ -868,7 +860,7 @@ export default function FormPendaftaran({ onKembali, onSelesai }) {
     const fetchOpsi = async () => {
       try {
         const token = localStorage.getItem("ppdb_token") || "";
-        const res = await fetch(`${BASE_URL}/pendaftaran/opsi`, {
+        const res = await fetch(`${API_BASE_URL}/pendaftaran/opsi`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         if (!res.ok) throw new Error("Gagal mengambil opsi pendaftaran.");

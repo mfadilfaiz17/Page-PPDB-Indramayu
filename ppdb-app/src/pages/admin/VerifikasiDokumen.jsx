@@ -23,7 +23,10 @@ export default function VerifikasiDokumen({ onNavigate }) {
   useEffect(() => {
     const fetchDokumen = async () => {
       try {
-        const token = localStorage.getItem("ppdb_admin_token") || "admin-token-2025";
+        const token = localStorage.getItem("ppdb_admin_token");
+        if (!token) {
+          throw new Error("Admin token tidak ditemukan. Silakan login kembali.");
+        }
         const resPendaftar = await fetch(`${BASE_URL}/pendaftaran/admin`, {
           headers: { Authorization: `Bearer ${token}` },
         });
